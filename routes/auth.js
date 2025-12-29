@@ -1,5 +1,5 @@
 import express from 'express';
-import { body } from 'express-validator';
+import { body, validationResult } from 'express-validator';
 import User from '../models/User.js';
 import { generateToken, generateVerificationToken } from '../utils/token.js';
 import { sendVerificationEmail } from '../utils/email.js';
@@ -15,6 +15,12 @@ router.post('/register', [
   body('role').isIn(['student', 'teacher']).withMessage('Role must be student or teacher')
 ], async (req, res) => {
   try {
+    // Check validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ message: errors.array()[0].msg, errors: errors.array() });
+    }
+
     const { name, email, password, role, subjects } = req.body;
 
     // Check if user exists
@@ -72,6 +78,12 @@ router.post('/login', [
   body('password').notEmpty().withMessage('Password is required')
 ], async (req, res) => {
   try {
+    // Check validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ message: errors.array()[0].msg, errors: errors.array() });
+    }
+
     const { email, password } = req.body;
 
     // Check user exists
